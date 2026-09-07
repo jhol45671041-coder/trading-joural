@@ -1,10 +1,12 @@
 import { useMemo, useState } from 'react'
 import { useTrades } from './hooks/useTrades'
+import { useTheme } from './hooks/useTheme'
 import { computeStats } from './lib/calc'
 import { StatsBar } from './components/StatsBar'
 import { TradeForm } from './components/TradeForm'
 import { TradeList } from './components/TradeList'
 import { HistoryPanel } from './components/HistoryPanel'
+import { ThemeToggle } from './components/ThemeToggle'
 
 type View = 'log' | 'history'
 
@@ -30,6 +32,7 @@ function Logo() {
 
 export default function App() {
   const { trades, addTrade, removeTrade, clearAll, loadSamples } = useTrades()
+  const { theme, toggleTheme } = useTheme()
   const stats = useMemo(() => computeStats(trades), [trades])
   const [view, setView] = useState<View>('log')
   const dayCount = useMemo(() => new Set(trades.map((t) => t.date)).size, [trades])
@@ -51,7 +54,10 @@ export default function App() {
               <p>Log the trade. Track the edge.</p>
             </div>
           </div>
-          <span className="today mono">{today}</span>
+          <div className="topbar-actions">
+            <span className="today mono">{today}</span>
+            <ThemeToggle theme={theme} onToggle={toggleTheme} />
+          </div>
         </div>
       </header>
 

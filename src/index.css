@@ -25,8 +25,46 @@
   --radius: 16px;
   --shadow-sm: 0 1px 2px rgba(23, 32, 59, 0.05);
   --shadow-md: 0 2px 4px rgba(23, 32, 59, 0.05), 0 12px 32px -14px rgba(23, 32, 59, 0.14);
+  --topbar-bg: rgba(255, 255, 255, 0.72);
+  --border-hover: #b9c2d9;
+  --focus-ring: 0 0 0 3.5px rgba(79, 70, 229, 0.14);
+  --invalid-ring: 0 0 0 3.5px rgba(220, 42, 63, 0.12);
   --font: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+
+/* ---------- dark theme ---------- */
+
+:root[data-theme='dark'] {
+  --bg: #0b0f19;
+  --surface: #121828;
+  --surface-2: #0e1422;
+  --inset: #0d1321;
+  --border: #232e4a;
+  --border-strong: #2e3b5c;
+  --text: #e9edf7;
+  --text-dim: #94a1bc;
+  --text-faint: #64728f;
+  --accent: #7c82f5;
+  --accent-soft: rgba(124, 130, 245, 0.16);
+  --green: #2dd4a0;
+  --green-ink: #16c784;
+  --green-soft: rgba(22, 199, 132, 0.14);
+  --red: #f66672;
+  --red-ink: #ef4456;
+  --red-soft: rgba(239, 68, 86, 0.14);
+  --blue: #5b9cf8;
+  --blue-soft: rgba(91, 156, 248, 0.14);
+  --violet: #a78bfa;
+  --violet-soft: rgba(167, 139, 250, 0.14);
+  --topbar-bg: rgba(11, 15, 25, 0.72);
+  --border-hover: #3a4a73;
+  --focus-ring: 0 0 0 3.5px rgba(124, 130, 245, 0.28);
+  --invalid-ring: 0 0 0 3.5px rgba(239, 68, 86, 0.22);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.35), 0 14px 36px -14px rgba(0, 0, 0, 0.6);
+  color-scheme: dark;
 }
 
 * {
@@ -86,7 +124,7 @@ body {
 
 .topbar {
   border-bottom: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.72);
+  background: var(--topbar-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   position: sticky;
@@ -134,6 +172,43 @@ body {
   padding: 6px 13px;
   background: var(--surface);
   box-shadow: var(--shadow-sm);
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.theme-toggle {
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-dim);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition:
+    color 0.15s,
+    border-color 0.15s,
+    transform 0.06s;
+}
+
+.theme-toggle:hover {
+  color: var(--accent);
+  border-color: var(--border-strong);
+}
+
+.theme-toggle:active {
+  transform: translateY(1px) rotate(12deg);
+}
+
+.theme-toggle svg {
+  display: block;
 }
 
 /* ---------- stats ---------- */
@@ -339,7 +414,7 @@ main.wrap {
 .trade-form input:hover:not(:focus),
 .trade-form select:hover:not(:focus),
 .trade-form textarea:hover:not(:focus) {
-  border-color: #b9c2d9;
+  border-color: var(--border-hover);
 }
 
 .trade-form input:focus,
@@ -347,14 +422,14 @@ main.wrap {
 .trade-form textarea:focus,
 .search:focus {
   outline: none;
-  background: #fff;
+  background: var(--surface);
   border-color: var(--accent);
-  box-shadow: 0 0 0 3.5px rgba(79, 70, 229, 0.14);
+  box-shadow: var(--focus-ring);
 }
 
 .trade-form input.invalid {
   border-color: var(--red-ink);
-  box-shadow: 0 0 0 3.5px rgba(220, 42, 63, 0.12);
+  box-shadow: var(--invalid-ring);
 }
 
 .trade-form input::placeholder,
@@ -375,7 +450,7 @@ main.wrap {
 }
 
 input[type='date'] {
-  color-scheme: light;
+  color-scheme: inherit;
 }
 
 /* ---------- segmented controls & buttons ---------- */

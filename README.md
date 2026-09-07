@@ -18,6 +18,8 @@ Built with Vite + React + TypeScript. No other runtime dependencies.
   (volume), W/L record, net P&L with a scaled bar, and an expandable per-day trade list;
   plus trading-days, avg trades/day, best day and worst day summaries
 - **Stats bar** — net P&L, win rate, average return (with best/worst), trade counts
+- **Light & dark themes** — toggle in the header; follows your OS until you pick one,
+  and your choice persists across visits
 - **Local persistence** via `localStorage` (seeded with sample trades on first visit)
 
 ## Getting started
