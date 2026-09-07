@@ -1,11 +1,15 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { Trade, TradeDraft } from '../types'
 import { SAMPLE_TRADES } from '../lib/sample'
+import { deleteScreenshot, saveScreenshot } from '../lib/images'
 
 const STORAGE_KEY = 'trading-jo…s.v1'
 
-/** Older saved rows may not have the concept field yet. */
-type StoredTrade = Omit<Trade, 'concept'> & { concept?: string }
+/** Older saved rows may not have the newer fields yet. */
+type StoredTrade = Omit<Trade, 'concept' | 'screenshotId'> & {
+  concept?: string
+  screenshotId?: string | null
+}
 
 function loadTrades(): Trade[] {
   try {
@@ -13,7 +17,11 @@ function loadTrades(): Trade[] {
     if (raw === null) return SAMPLE_TRADES
     const parsed: unknown = JSON.parse(raw)
     if (!Array.isArray(parsed)) return []
-    return (parsed as StoredTrade[]).map((t) => ({ ...t, concept: t.concept ?? '' }))
+    return (parsed as StoredTrade[]).map((t) => ({
+      ...t,
+      concept: t.concept ?? '',
+      screenshotId: t.screenshotId ?? null,
+    }))
   } catch {
     return []
   }
@@ -30,16 +38,34 @@ export function useTrades() {
     }
   }, [trades])
 
-  const addTrade = useCallback((draft: TradeDraft) => {
-    const trade: Trade = { ...draft, id: crypto.randomUUID(), createdAt: Date.now() }
+  /** `image` is stored in IndexedDB before the trade row is appended. */
+  const addTrade = useCallback(async (draft: TradeDraft, image?: File | null) => {
+    let screenshotId: string | null = null
+    if (image) {
+      try {
+        screenshotId = await saveScreenshot(image)
+      } catch {
+        // persistence hiccup — still save the trade, just without the shot
+      }
+    }
+    const trade: Trade = { ...draft, screenshotId, id: crypto.randomUUID(), createdAt: Date.now() }
     setTrades((ts) => [trade, ...ts])
   }, [])
 
   const removeTrade = useCallback((id: string) => {
-    setTrades((ts) => ts.filter((t) => t.id !== id))
+    setTrades((ts) => {
+      const shot = ts.find((t) => t.id === id)?.screenshotId
+      if (shot) void deleteScreenshot(shot)
+      return ts.filter((t) => t.id !== id)
+    })
   }, [])
 
-  const clearAll = useCallback(() => setTrades([]), [])
+  const clearAll = useCallback(() => {
+    setTrades((ts) => {
+      for (const t of ts) if (t.screenshotId) void deleteScreenshot(t.screenshotId)
+      return []
+    })
+  }, [])
 
   const loadSamples = useCallback(() => setTrades(SAMPLE_TRADES), [])
 

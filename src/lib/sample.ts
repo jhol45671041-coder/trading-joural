@@ -24,6 +24,7 @@ const mk = (
   setup,
   concept,
   notes,
+  screenshotId: null,
   createdAt: 0,
 })
 

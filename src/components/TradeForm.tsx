@@ -1,10 +1,11 @@
-import { type FormEvent, useMemo, useState } from 'react'
+import { type FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Direction, TradeDraft } from '../types'
 import { SETUPS } from '../types'
 import { fmtSignedPct, fmtSignedUsd } from '../lib/calc'
+import { formatSize, validateScreenshotFile, MAX_SCREENSHOT_MB } from '../lib/images'
 
 interface Props {
-  onAdd: (draft: TradeDraft) => void
+  onAdd: (draft: TradeDraft, image?: File | null) => void
 }
 
 interface FormState {
@@ -51,10 +52,68 @@ const parseNum = (s: string): number => {
 export function TradeForm({ onAdd }: Props) {
   const [form, setForm] = useState<FormState>(initialState)
   const [errors, setErrors] = useState<Errors>({})
+  const [image, setImage] = useState<File | null>(null)
+  const [imageError, setImageError] = useState<string | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const previewUrlRef = useRef<string | null>(null)
+  const [dragging, setDragging] = useState(false)
+  const fileRef = useRef<HTMLInputElement>(null)
 
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) => {
     setForm((f) => ({ ...f, [key]: value }))
     if (errors[key]) setErrors((e) => ({ ...e, [key]: undefined }))
+  }
+
+  const revokePreview = useCallback(() => {
+    if (previewUrlRef.current) {
+      URL.revokeObjectURL(previewUrlRef.current)
+      previewUrlRef.current = null
+    }
+  }, [])
+
+  // Revoke the pending preview when the form unmounts.
+  useEffect(() => revokePreview, [revokePreview])
+
+  const pickImage = useCallback(
+    (file: File | undefined | null) => {
+      if (!file) return
+      const err = validateScreenshotFile(file)
+      if (err) {
+        setImageError(err)
+        setImage(null)
+        revokePreview()
+        setImagePreview(null)
+        return
+      }
+      const url = URL.createObjectURL(file)
+      revokePreview()
+      previewUrlRef.current = url
+      setImagePreview(url)
+      setImageError(null)
+      setImage(file)
+    },
+    [revokePreview],
+  )
+
+  // Paste a screenshot anywhere (only intercepts image payloads, text is untouched).
+  useEffect(() => {
+    const onPaste = (e: ClipboardEvent) => {
+      const file = Array.from(e.clipboardData?.files ?? []).find((f) => f.type.startsWith('image/'))
+      if (file) {
+        e.preventDefault()
+        pickImage(file)
+      }
+    }
+    window.addEventListener('paste', onPaste)
+    return () => window.removeEventListener('paste', onPaste)
+  }, [pickImage])
+
+  const clearImage = () => {
+    setImage(null)
+    setImageError(null)
+    revokePreview()
+    setImagePreview(null)
+    if (fileRef.current) fileRef.current.value = ''
   }
 
   const entryN = parseNum(form.entry)
@@ -90,20 +149,24 @@ export function TradeForm({ onAdd }: Props) {
       setErrors(next)
       return
     }
-    onAdd({
-      symbol: form.symbol.trim().toUpperCase(),
-      direction: form.direction,
-      date: form.date,
-      entry: entryN,
-      exit: form.exit.trim() === '' ? null : exitN,
-      qty: qtyN,
-      fees: feesN,
-      setup: form.setup,
-      concept: form.concept.trim(),
-      notes: form.notes.trim(),
-    })
+    onAdd(
+      {
+        symbol: form.symbol.trim().toUpperCase(),
+        direction: form.direction,
+        date: form.date,
+        entry: entryN,
+        exit: form.exit.trim() === '' ? null : exitN,
+        qty: qtyN,
+        fees: feesN,
+        setup: form.setup,
+        concept: form.concept.trim(),
+        notes: form.notes.trim(),
+      },
+      image,
+    )
     setErrors({})
     setForm({ ...initialState(), date: form.date, setup: form.setup, concept: form.concept })
+    clearImage()
   }
 
   return (
@@ -252,6 +315,62 @@ export function TradeForm({ onAdd }: Props) {
           onChange={(e) => set('notes', e.target.value)}
           placeholder="What did the plan say? What did you actually do?"
         />
+      </div>
+
+      <div className="field">
+        <span className="field-label">Chart screenshot</span>
+        {image && imagePreview ? (
+          <div className="shot-preview">
+            <img src={imagePreview} alt="Selected chart screenshot" />
+            <div className="shot-bar">
+              <span className="mono">
+                {image.name} · {formatSize(image.size)}
+              </span>
+              <button type="button" className="shot-remove" onClick={clearImage}>
+                Remove
+              </button>
+            </div>
+          </div>
+        ) : (
+          <label
+            className={`dropzone${dragging ? ' dragging' : ''}`}
+            onDragOver={(e) => {
+              e.preventDefault()
+              setDragging(true)
+            }}
+            onDragLeave={() => setDragging(false)}
+            onDrop={(e) => {
+              e.preventDefault()
+              setDragging(false)
+              pickImage(e.dataTransfer.files?.[0])
+            }}
+          >
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              className="dz-input"
+              onChange={(e) => pickImage(e.target.files?.[0])}
+            />
+            <svg
+              viewBox="0 0 24 24"
+              width="22"
+              height="22"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+              <circle cx="12" cy="13" r="4" />
+            </svg>
+            <span className="dz-title">Click, drop, or paste (Ctrl/Cmd+V) a chart shot</span>
+            <span className="dz-hint">PNG / JPG, up to {MAX_SCREENSHOT_MB} MB · optional</span>
+          </label>
+        )}
+        {imageError && <p className="field-error">{imageError}</p>}
       </div>
 
       <div className="form-actions">

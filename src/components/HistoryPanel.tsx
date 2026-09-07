@@ -128,6 +128,7 @@ export function HistoryPanel({ trades }: Props) {
                           {t.setup}
                           {t.concept ? ` · ${t.concept}` : ''}
                         </span>
+                        {t.screenshotId && <span className="mini-shot" title="Has chart screenshot">📷</span>}
                         {closed && pnl !== null ? (
                           <span className={`mini-pnl mono ${pnl >= 0 ? 'pos' : 'neg'}`}>{fmtSignedUsd(pnl)}</span>
                         ) : (

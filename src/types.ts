@@ -15,10 +15,12 @@ export interface Trade {
   /** The idea/edge behind the entry — free text, optional */
   concept: string
   notes: string
+  /** Key of this trade's screenshot blob in IndexedDB; null when absent */
+  screenshotId: string | null
   createdAt: number
 }
 
-export type TradeDraft = Omit<Trade, 'id' | 'createdAt'>
+export type TradeDraft = Omit<Trade, 'id' | 'createdAt' | 'screenshotId'>
 
 export const SETUPS = [
   'Breakout',

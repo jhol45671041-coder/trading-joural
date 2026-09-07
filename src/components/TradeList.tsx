@@ -10,6 +10,7 @@ import {
   pnlOf,
   returnPctOf,
 } from '../lib/calc'
+import { ShotLightbox, ShotThumb } from './Screenshots'
 
 type Filter = 'all' | 'open' | 'wins' | 'losses'
 
@@ -39,6 +40,7 @@ function matchesFilter(t: Trade, filter: Filter): boolean {
 export function TradeList({ trades, onDelete, onClearAll, onLoadSamples }: Props) {
   const [filter, setFilter] = useState<Filter>('all')
   const [query, setQuery] = useState('')
+  const [lightbox, setLightbox] = useState<{ shotId: string; label: string } | null>(null)
 
   const visible = useMemo(() => {
     const q = query.trim().toUpperCase()
@@ -108,6 +110,7 @@ export function TradeList({ trades, onDelete, onClearAll, onLoadSamples }: Props
             const pnl = pnlOf(t) ?? 0
             const ret = returnPctOf(t)
             const tone = closed ? (pnl > 0 ? 'pos' : 'neg') : 'open'
+            const label = `${t.symbol} · ${fmtDate(t.date)}`
             return (
               <li key={t.id} className={`trade-row ${tone}`}>
                 <div className="trade-main">
@@ -115,6 +118,11 @@ export function TradeList({ trades, onDelete, onClearAll, onLoadSamples }: Props
                     <span className="trade-symbol">{t.symbol}</span>
                     <span className={`dir ${t.direction}`}>{t.direction === 'long' ? '▲ LONG' : '▼ SHORT'}</span>
                     {!closed && <span className="badge-open">OPEN</span>}
+                    <ShotThumb
+                      shotId={t.screenshotId}
+                      label={label}
+                      onOpen={(shotId, l) => setLightbox({ shotId, label: l })}
+                    />
                   </div>
                   <div className="trade-meta mono">
                     <span>{fmtDate(t.date)}</span>
@@ -177,6 +185,10 @@ export function TradeList({ trades, onDelete, onClearAll, onLoadSamples }: Props
             Clear all
           </button>
         </div>
+      )}
+
+      {lightbox && (
+        <ShotLightbox shotId={lightbox.shotId} label={lightbox.label} onClose={() => setLightbox(null)} />
       )}
     </div>
   )
