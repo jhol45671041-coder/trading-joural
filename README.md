@@ -35,7 +35,7 @@ npm run lint     # oxlint
 src/
   App.tsx                  page shell: header, stats, form + tabbed panel (log / history)
   types.ts                 Trade model + setup tags
-  index.css                dark terminal theme
+  index.css                light "fintech" design system (Inter + IBM Plex Mono)
   hooks/useTrades.ts       state + localStorage persistence (+ schema migration)
   lib/calc.ts              P&L / return / stats / daily grouping + formatting helpers
   lib/sample.ts            seed data for first visit

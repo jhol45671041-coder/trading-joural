@@ -11,19 +11,19 @@ type View = 'log' | 'history'
 function Logo() {
   return (
     <svg className="logo" viewBox="0 0 64 64" width="34" height="34" aria-hidden="true">
-      <rect width="64" height="64" rx="14" fill="url(#logo-grad)" />
-      <g stroke-linecap="round">
-        <line x1="21" y1="12" x2="21" y2="52" stroke="#16c784" strokeWidth="3" />
-        <rect x="15" y="22" width="12" height="18" rx="2" fill="#16c784" />
-        <line x1="43" y1="14" x2="43" y2="54" stroke="#ea3943" strokeWidth="3" />
-        <rect x="37" y="26" width="12" height="16" rx="2" fill="#ea3943" />
-      </g>
       <defs>
         <linearGradient id="logo-grad" x1="0" y1="0" x2="64" y2="64">
-          <stop stopColor="#141a2a" />
-          <stop offset="1" stopColor="#0b0e14" />
+          <stop stopColor="#6366f1" />
+          <stop offset="1" stopColor="#4338ca" />
         </linearGradient>
       </defs>
+      <rect width="64" height="64" rx="14" fill="url(#logo-grad)" />
+      <g stroke="#fff" strokeLinecap="round">
+        <line x1="22" y1="13" x2="22" y2="51" strokeWidth="3" />
+        <rect x="16" y="22" width="12" height="18" rx="2.5" fill="#fff" stroke="none" />
+        <line x1="42" y1="13" x2="42" y2="51" strokeWidth="3" stroke="rgba(255,255,255,.55)" />
+        <rect x="36" y="24" width="12" height="16" rx="2.5" fill="rgba(255,255,255,.38)" stroke="none" />
+      </g>
     </svg>
   )
 }
