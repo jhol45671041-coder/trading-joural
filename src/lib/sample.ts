@@ -10,6 +10,7 @@ const mk = (
   qty: number,
   fees: number,
   setup: string,
+  concept: string,
   notes: string,
 ): Trade => ({
   id,
@@ -21,6 +22,7 @@ const mk = (
   qty,
   fees,
   setup,
+  concept,
   notes,
   createdAt: 0,
 })
@@ -36,6 +38,7 @@ export const SAMPLE_TRADES: Trade[] = [
     50,
     2,
     'Breakout',
+    'Higher-low pullback into 1H bull flag',
     'Bull flag on the 1h after the AI capex headline. Took profit into morning strength; entry plan was clean.',
   ),
   mk(
@@ -48,6 +51,7 @@ export const SAMPLE_TRADES: Trade[] = [
     40,
     2,
     'Pullback',
+    'Mean-reversion fade at 20D after gap fill',
     'Rejected at the 20d average. Quick scalp — should have sized up, exit was by the book.',
   ),
   mk(
@@ -60,6 +64,7 @@ export const SAMPLE_TRADES: Trade[] = [
     30,
     2,
     'Earnings / News',
+    'Counter-trend knife catch (no confirmation)',
     'Caught a falling knife into the print. Size was too big for the setup; next time wait for the reclaim.',
   ),
   mk(
@@ -72,6 +77,7 @@ export const SAMPLE_TRADES: Trade[] = [
     20,
     1,
     'Breakout',
+    'Weekly range expansion',
     'Swing position: weekly range breakout. Trail below the 5-day, scale half at +3%.',
   ),
   mk(
@@ -84,6 +90,7 @@ export const SAMPLE_TRADES: Trade[] = [
     25,
     2,
     'Other',
+    'Fade of failed open drive',
     'Chased a fade at the open with no confirmation. Ruled a loser before entry — process failure, not a market failure.',
   ),
 ]

@@ -44,7 +44,7 @@ export function TradeList({ trades, onDelete, onClearAll, onLoadSamples }: Props
     const q = query.trim().toUpperCase()
     return trades
       .filter((t) => {
-        if (q && ![t.symbol, t.setup, t.notes].some((s) => s.toUpperCase().includes(q))) return false
+        if (q && ![t.symbol, t.setup, t.concept, t.notes].some((s) => s.toUpperCase().includes(q))) return false
         return matchesFilter(t, filter)
       })
       .sort((a, b) => b.date.localeCompare(a.date) || b.createdAt - a.createdAt)
@@ -120,6 +120,14 @@ export function TradeList({ trades, onDelete, onClearAll, onLoadSamples }: Props
                     <span>{fmtDate(t.date)}</span>
                     <span className="dot" />
                     <span>{t.setup}</span>
+                    {t.concept && (
+                      <>
+                        <span className="dot" />
+                        <span className="concept-chip" title={t.concept}>
+                          {t.concept}
+                        </span>
+                      </>
+                    )}
                     <span className="dot" />
                     <span>
                       {fmtPrice(t.entry)} → {t.exit === null ? '—' : fmtPrice(t.exit)}

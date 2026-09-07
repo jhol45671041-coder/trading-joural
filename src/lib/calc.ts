@@ -130,3 +130,43 @@ export function fmtDate(iso: string): string {
   const d = new Date(`${iso}T00:00:00`)
   return Number.isNaN(d.getTime()) ? iso : dateFmt.format(d)
 }
+
+/* ---------- daily history ---------- */
+
+export interface DaySummary {
+  date: string
+  trades: Trade[]
+  count: number
+  netPnl: number
+  /** summed entry price × size for every position taken that day */
+  volume: number
+  wins: number
+  losses: number
+  open: number
+}
+
+/** Group trades by date, newest day first. */
+export function groupByDay(trades: Trade[]): DaySummary[] {
+  const map = new Map<string, DaySummary>()
+  for (const t of trades) {
+    let d = map.get(t.date)
+    if (!d) {
+      d = { date: t.date, trades: [], count: 0, netPnl: 0, volume: 0, wins: 0, losses: 0, open: 0 }
+      map.set(t.date, d)
+    }
+    d.trades.push(t)
+    d.count++
+    d.volume += costOf(t)
+    if (t.exit === null) {
+      d.open++
+      continue
+    }
+    const pnl = pnlOf(t) ?? 0
+    d.netPnl += pnl
+    if (pnl > 0) d.wins++
+    else d.losses++
+  }
+  const days = [...map.values()]
+  for (const d of days) d.trades.sort((a, b) => b.createdAt - a.createdAt)
+  return days.sort((a, b) => b.date.localeCompare(a.date))
+}

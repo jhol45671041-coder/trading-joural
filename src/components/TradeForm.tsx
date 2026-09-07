@@ -16,6 +16,7 @@ interface FormState {
   qty: string
   fees: string
   setup: string
+  concept: string
   notes: string
 }
 
@@ -36,6 +37,7 @@ const initialState = (): FormState => ({
   qty: '',
   fees: '0',
   setup: SETUPS[0],
+  concept: '',
   notes: '',
 })
 
@@ -97,10 +99,11 @@ export function TradeForm({ onAdd }: Props) {
       qty: qtyN,
       fees: feesN,
       setup: form.setup,
+      concept: form.concept.trim(),
       notes: form.notes.trim(),
     })
     setErrors({})
-    setForm({ ...initialState(), date: form.date, setup: form.setup })
+    setForm({ ...initialState(), date: form.date, setup: form.setup, concept: form.concept })
   }
 
   return (
@@ -214,15 +217,30 @@ export function TradeForm({ onAdd }: Props) {
         </div>
       </div>
 
-      <div className="field">
-        <label htmlFor="f-setup">Setup</label>
-        <select id="f-setup" value={form.setup} onChange={(e) => set('setup', e.target.value)}>
-          {SETUPS.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
+      <div className="field-row two">
+        <div className="field">
+          <label htmlFor="f-setup">Setup</label>
+          <select id="f-setup" value={form.setup} onChange={(e) => set('setup', e.target.value)}>
+            {SETUPS.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="field">
+          <label htmlFor="f-concept">
+            Concept <span className="optional">— the idea behind the entry</span>
+          </label>
+          <input
+            id="f-concept"
+            value={form.concept}
+            onChange={(e) => set('concept', e.target.value)}
+            placeholder="e.g. higher-low into bull flag"
+            maxLength={80}
+            autoComplete="off"
+          />
+        </div>
       </div>
 
       <div className="field">

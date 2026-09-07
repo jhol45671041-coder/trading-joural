@@ -12,6 +12,8 @@ export interface Trade {
   qty: number
   fees: number
   setup: string
+  /** The idea/edge behind the entry — free text, optional */
+  concept: string
   notes: string
   createdAt: number
 }

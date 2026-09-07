@@ -1,9 +1,12 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useTrades } from './hooks/useTrades'
 import { computeStats } from './lib/calc'
 import { StatsBar } from './components/StatsBar'
 import { TradeForm } from './components/TradeForm'
 import { TradeList } from './components/TradeList'
+import { HistoryPanel } from './components/HistoryPanel'
+
+type View = 'log' | 'history'
 
 function Logo() {
   return (
@@ -28,6 +31,8 @@ function Logo() {
 export default function App() {
   const { trades, addTrade, removeTrade, clearAll, loadSamples } = useTrades()
   const stats = useMemo(() => computeStats(trades), [trades])
+  const [view, setView] = useState<View>('log')
+  const dayCount = useMemo(() => new Set(trades.map((t) => t.date)).size, [trades])
 
   const today = new Intl.DateTimeFormat('en-US', {
     weekday: 'short',
@@ -59,16 +64,41 @@ export default function App() {
             </div>
             <TradeForm onAdd={addTrade} />
           </section>
-          <section className="panel list-panel" aria-label="Trades">
+
+          <section className="panel list-panel" aria-label="Journal">
             <div className="panel-head">
-              <h2>Trade log</h2>
+              <h2 className="sr-only">Journal views</h2>
+              <div className="segmented tabs" role="tablist" aria-label="Switch between trade log and history">
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={view === 'log'}
+                  className={`seg${view === 'log' ? ' active' : ''}`}
+                  onClick={() => setView('log')}
+                >
+                  Trade log <span className="count mono">{trades.length}</span>
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={view === 'history'}
+                  className={`seg${view === 'history' ? ' active' : ''}`}
+                  onClick={() => setView('history')}
+                >
+                  History <span className="count mono">{dayCount}</span>
+                </button>
+              </div>
             </div>
-            <TradeList
-              trades={trades}
-              onDelete={removeTrade}
-              onClearAll={clearAll}
-              onLoadSamples={loadSamples}
-            />
+            {view === 'log' ? (
+              <TradeList
+                trades={trades}
+                onDelete={removeTrade}
+                onClearAll={clearAll}
+                onLoadSamples={loadSamples}
+              />
+            ) : (
+              <HistoryPanel trades={trades} />
+            )}
           </section>
         </div>
       </main>

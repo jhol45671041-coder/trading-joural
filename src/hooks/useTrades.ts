@@ -4,12 +4,16 @@ import { SAMPLE_TRADES } from '../lib/sample'
 
 const STORAGE_KEY = 'trading-jo…s.v1'
 
+/** Older saved rows may not have the concept field yet. */
+type StoredTrade = Omit<Trade, 'concept'> & { concept?: string }
+
 function loadTrades(): Trade[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (raw === null) return SAMPLE_TRADES
     const parsed: unknown = JSON.parse(raw)
-    return Array.isArray(parsed) ? (parsed as Trade[]) : []
+    if (!Array.isArray(parsed)) return []
+    return (parsed as StoredTrade[]).map((t) => ({ ...t, concept: t.concept ?? '' }))
   } catch {
     return []
   }
